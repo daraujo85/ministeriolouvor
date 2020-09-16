@@ -1,8 +1,12 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MinisterioLouvor.Context;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace POCMinisterioLouvor.Models
+namespace MinisterioLouvor.Models
 {
+    [BsonCollection("musicas")]
     public class Musica
     {
         [BsonId]
@@ -21,7 +25,7 @@ namespace POCMinisterioLouvor.Models
         public string VozPrincipal { get; set; }
 
         [BsonElement("tags")]
-        public string[] Tags { get; set; }
+        public List<string> Tags { get; set; }
 
         [BsonElement("dificuldade")]
         public string Dificuldade { get; set; }
@@ -35,6 +39,10 @@ namespace POCMinisterioLouvor.Models
         [BsonElement("linkLetra")]
         public string LinkLetra { get; set; }
 
+        public Musica()
+        {
+            Tags = new List<string>();
+        }
 
     }
 }

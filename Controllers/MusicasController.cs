@@ -1,56 +1,75 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using POCMinisterioLouvor.Models;
+using MinisterioLouvor.Interfaces;
+using MinisterioLouvor.Models;
+using System;
 using System.Threading.Tasks;
 
-namespace POCMinisterioLouvor.Controllers
+namespace MinisterioLouvor.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class MusicasController : ControllerBase
     {
-        private IMongoCollection<Musica> _musicas;
-        private IMongoClient _client;
-        private IMongoDatabase _database;        
+        private readonly IMusicaRepository _musicaRepository;
 
-        public MusicasController()
+        public MusicasController(IMusicaRepository musicaRepository)
         {
-            _client  = new MongoClient("mongodb+srv://admin:pibvm2020@cluster0.hqtze.mongodb.net/ministeriolouvor?retryWrites=true&w=majority");
-
-            _database = _client.GetDatabase("ministeriolouvor");
-
-            _musicas = _database.GetCollection<Musica>("musicas");
+            _musicaRepository = musicaRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             
-            var result = await _musicas.FindAsync(x => true);
+            var result = await _musicaRepository.GetAll();
 
-            return Ok(result.ToList());
+            return Ok(result);
         }
 
         [HttpGet("Tom/{tom}")]
         public async Task<IActionResult> GetByTom(string tom)
         {
-            var result = await _musicas.FindAsync(x => x.Tom == tom.ToUpper());
+            var result = await _musicaRepository.GetByTom(tom.ToUpper());
 
-            return Ok(result.ToList());
+            return Ok(result);
+        }
+        /// <summary>
+        /// Método de busca que verifica se encontra alguma música que contenha pelo menos uma parte do titulo
+        /// </summary>
+        /// <param name="titulo"></param>
+        /// <returns></returns>
+        [HttpGet("Titulo/{titulo}")]
+        public async Task<IActionResult> GetByTitulo(string titulo)
+        {
+            var result = await _musicaRepository.GetByTitulo(titulo);
+
+            return Ok(result);
         }
 
+        /// <summary>
+        /// Método de busca que verifica se encontra alguma música que contenha pelo menos uma parte de alguma tag
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        [HttpGet("Tags/{tag}")]
+        public async Task<IActionResult> GetByTag(string tag)
+        {
+            var result = await _musicaRepository.GetByTag(tag);
+
+            return Ok(result);
+        }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Musica musica)
         {
 
-            var checkResult = await _musicas.FindAsync(x => x.Titulo == musica.Titulo.Trim());
+            var checkResult = await _musicaRepository.GetByTitulo(musica.Titulo.Trim());
 
-            if (checkResult.Any())
+            if (checkResult != null)
             {
                 return BadRequest($"Não foi possível realizar o cadastro da música {musica.Titulo}, pois ela já existe!");
             }
 
-            await _musicas.InsertOneAsync(musica);
+             _musicaRepository.Add(musica);
 
 
             return StatusCode(201, musica);
@@ -58,19 +77,21 @@ namespace POCMinisterioLouvor.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Put(string id, [FromBody] Musica musica)
         {
-            var checkResult = await _musicas.FindAsync(x => x.Id == id);
+            var guid = new Guid(id);
 
-            if (!checkResult.Any())
+            var checkResult = await _musicaRepository.GetById(guid);
+
+            if (checkResult == null)
             {
                 return NotFound($"Não foi possível encontrar a música {musica.Titulo}");
             }
 
-            var result = await _musicas.ReplaceOneAsync(x=> x.Id == id, musica);
+              _musicaRepository.Update(musica);
 
-            if (result.MatchedCount == 0)
-            {
-                return BadRequest($"Não foi possível alterar a música {musica.Titulo}");
-            }
+            //if (result.MatchedCount == 0)
+            //{
+            //    return BadRequest($"Não foi possível alterar a música {musica.Titulo}");
+            //}
 
             return StatusCode(204);
         }
@@ -78,19 +99,21 @@ namespace POCMinisterioLouvor.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var checkResult = await _musicas.FindAsync(x => x.Id == id);
+            var guid = new Guid(id);
 
-            if (!checkResult.Any())
+            var checkResult = await _musicaRepository.GetById(guid);
+
+            if (checkResult == null)
             {
                 return NotFound($"Não foi possível encontrar a música com o Id informado {id}");
             }
 
-            var result = await _musicas.DeleteOneAsync(x => x.Id == id);
+             _musicaRepository.Remove(guid);
 
-            if (result.DeletedCount == 0)
-            {
-                return BadRequest($"Não foi possível deletar a música com o Id informado {id}");
-            }
+            //if (result.DeletedCount == 0)
+            //{
+            //    return BadRequest($"Não foi possível deletar a música com o Id informado {id}");
+            //}
 
             return StatusCode(204);
         }
