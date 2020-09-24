@@ -7,9 +7,6 @@ using MinisterioLouvor.Context;
 using MinisterioLouvor.Interfaces;
 using MinisterioLouvor.Persistence;
 using MinisterioLouvor.Respository;
-using System;
-using System.IO;
-using System.Reflection;
 
 namespace MinisterioLouvor
 {
@@ -34,6 +31,8 @@ namespace MinisterioLouvor
             RegisterSwagger(services);
 
             services.AddControllers();
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,6 +54,8 @@ namespace MinisterioLouvor
             }
 
             app.UseRouting();
+
+            app.UseCors(option => option.AllowAnyOrigin());
 
             app.UseAuthorization();
 

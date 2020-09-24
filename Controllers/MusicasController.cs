@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using MinisterioLouvor.Interfaces;
 using MinisterioLouvor.Models;
 using System;
@@ -16,7 +17,6 @@ namespace MinisterioLouvor.Controllers
         {
             _musicaRepository = musicaRepository;
         }
-
         [HttpGet]
         public async Task<IActionResult> Get()
         {
