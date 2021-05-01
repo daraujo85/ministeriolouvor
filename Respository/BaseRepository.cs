@@ -20,10 +20,12 @@ namespace MinisterioLouvor.Respository
             Context = context;
         }
 
-        public virtual void Add(TEntity obj)
+        public virtual async Task<TEntity> AddAsync(TEntity obj)
         {
             ConfigDbSet();
-            Context.AddCommand(() => DbSet.InsertOneAsync(obj));
+            await DbSet.InsertOneAsync(obj);
+
+            return obj;
         }
 
         public void ConfigDbSet()

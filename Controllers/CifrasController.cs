@@ -60,7 +60,7 @@ namespace MinisterioLouvor.Controllers
                 return NotFound($"Não foi possível realizar o cadastro da cifra, pois ela já existe!");
             }
 
-             _cifraRepository.Add(cifra);
+            await _cifraRepository.AddAsync(cifra);
 
             return StatusCode(201, cifra);
         }

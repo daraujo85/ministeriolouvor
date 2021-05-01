@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinisterioLouvor.Interfaces;
 using MinisterioLouvor.Models;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MinisterioLouvor.Controllers
@@ -64,12 +65,12 @@ namespace MinisterioLouvor.Controllers
 
             var checkResult = await _musicaRepository.GetByTitulo(musica.Titulo.Trim());
 
-            if (checkResult != null)
+            if (checkResult.Any())
             {
                 return BadRequest($"Não foi possível realizar o cadastro da música {musica.Titulo}, pois ela já existe!");
             }
 
-             _musicaRepository.Add(musica);
+             await _musicaRepository.AddAsync(musica);
 
 
             return StatusCode(201, musica);
