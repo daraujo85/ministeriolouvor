@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MinisterioLouvor.Interfaces;
 using MinisterioLouvor.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace MinisterioLouvor.Controllers
 {
@@ -18,6 +18,21 @@ namespace MinisterioLouvor.Controllers
         {
             _musicaRepository = musicaRepository;
         }
+
+        [HttpGet("GetYoutubeInfo/{titulo}")]
+        public async Task<IActionResult> GetYoutubeInfo(string titulo)
+        {
+            var result = await _musicaRepository.YoutubeSearch(titulo);
+
+            if (result.Any())
+            {
+                return Ok(result);
+            }
+
+            return BadRequest("Não foi possível encontrar nenhum vídeo");
+
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get()
         {
