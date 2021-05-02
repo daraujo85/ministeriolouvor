@@ -59,6 +59,7 @@ namespace MinisterioLouvor.Respository
             {
                 videos.Add(new Video
                 {
+                    Id = searchResult.Id.VideoId,
                     Titulo = searchResult.Snippet.Title,
                     Descricao = searchResult.Snippet.Description,
                     LargeThumbnail = $"https://img.youtube.com/vi/{searchResult.Id.VideoId}/0.jpg",
