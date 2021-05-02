@@ -53,12 +53,16 @@ namespace MinisterioLouvor.Respository
 
             // Add each result to the appropriate list, and then display the lists of
             // matching videos, channels, and playlists.
+            // 120 x 90 => https://i.ytimg.com/vi/5QHF5OQeFOs/default.jpg
+            // 480 x 360 => https://img.youtube.com/vi/{searchResult.Id.VideoId}/0.jpg
             foreach (var searchResult in searchListResponse.Items.Where(x => x.Id.Kind == "youtube#video"))
             {
                 videos.Add(new Video
                 {
                     Titulo = searchResult.Snippet.Title,
-                    Thumbnail = $"https://img.youtube.com/vi/{searchResult.Id.VideoId}/0.jpg",
+                    Descricao = searchResult.Snippet.Description,
+                    LargeThumbnail = $"https://img.youtube.com/vi/{searchResult.Id.VideoId}/0.jpg",
+                    SmallThumbnail = $"https://i.ytimg.com/vi/{searchResult.Id.VideoId}/default.jpg",
                     Url = $"https://www.youtube.com/watch?v={searchResult.Id.VideoId}"
                 });
             }
