@@ -44,16 +44,14 @@ namespace MinisterioLouvor.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Cifra cifra)
         {
-            var guid = new Guid(cifra.MusicaId);
-
-            var checMusicakResult = await _musicaRepository.GetById(guid);
+            var checMusicakResult = await _musicaRepository.GetById(cifra.MusicaId);
 
             if (checMusicakResult == null)
             {
                 return NotFound($"A música informada não existe");
             }
 
-            var checCifrakResult = await _cifraRepository.GetByMusicaId(guid);
+            var checCifrakResult = await _cifraRepository.GetByMusicaId(cifra.Id);
 
             if (checCifrakResult != null)
             {
@@ -67,25 +65,22 @@ namespace MinisterioLouvor.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Put(string id, [FromBody] Cifra cifra)
         {
-            var guid = new Guid(id);
 
-            var musicaId = new Guid(id);
-
-            var checMusicakResult = await _musicaRepository.GetById(musicaId);
+            var checMusicakResult = await _musicaRepository.GetById(cifra.MusicaId);
 
             if (checMusicakResult == null)
             {
                 return NotFound($"A música informada não existe");
             }
 
-            var checkResult = await _cifraRepository.GetById(guid);
+            var checkResult = await _cifraRepository.GetById(id);
 
             if (checkResult == null)
             {
                 return NotFound($"Não foi possível encontrar a cifra");
             }
 
-            _cifraRepository.Update(cifra);
+            _cifraRepository.Update(id, cifra);
 
             //if (result.MatchedCount == 0)
             //{
@@ -98,16 +93,14 @@ namespace MinisterioLouvor.Controllers
         [HttpDelete("{id:length(24)}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var guid = new Guid(id);
-
-            var checkResult = await _cifraRepository.GetById(guid);
+            var checkResult = await _cifraRepository.GetById(id);
 
             if (checkResult == null)
             {
                 return NotFound($"Não foi possível encontrar a cifra com o Id informado {id}");
             }
 
-            _musicaRepository.Remove(guid);
+            _musicaRepository.Remove(id);
 
             //if (result.DeletedCount == 0)
             //{

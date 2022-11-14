@@ -2,11 +2,10 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MinisterioLouvor.Context;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace MinisterioLouvor.Models
 {
-    [BsonCollection("musicas")]
+  [BsonCollection("musicas")]
     public class Musica
     {
         [BsonId]

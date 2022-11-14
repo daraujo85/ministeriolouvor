@@ -1,13 +1,10 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MinisterioLouvor.Persistence
 {
-    public static class MongoDbPersistence
+  public static class MongoDbPersistence
     {
         [Obsolete]
         public static void Configure()

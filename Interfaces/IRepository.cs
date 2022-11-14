@@ -7,9 +7,9 @@ namespace MinisterioLouvor.Interfaces
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {
         Task<TEntity> AddAsync(TEntity obj);
-        Task<TEntity> GetById(Guid id);
+        Task<TEntity> GetById(string id);
         Task<IEnumerable<TEntity>> GetAll();
-        void Update(TEntity obj);
-        void Remove(Guid id);
+        void Update(string id, TEntity obj);
+        void Remove(string id);
     }
 }

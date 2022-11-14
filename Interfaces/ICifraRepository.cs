@@ -9,6 +9,6 @@ namespace MinisterioLouvor.Interfaces
     {
         Task<IEnumerable<Cifra>> GetByConteudo(string conteudo);
 
-        Task<Cifra> GetByMusicaId(Guid musicaId);
+        Task<Cifra> GetByMusicaId(string musicaId);
     }
 }

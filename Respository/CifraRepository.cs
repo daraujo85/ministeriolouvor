@@ -20,7 +20,7 @@ namespace MinisterioLouvor.Respository
             return data;
         }
 
-        public async Task<Cifra> GetByMusicaId(Guid musicaId)
+        public async Task<Cifra> GetByMusicaId(string musicaId)
         {
             var data = await GetByFilter(x => x.MusicaId == musicaId.ToString());
 
