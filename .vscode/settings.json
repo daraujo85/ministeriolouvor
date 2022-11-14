@@ -1,0 +1,9 @@
+{
+    "files.exclude": {
+        "obj/": true,
+        "Properties/": true,
+        "bin/": true,
+        ".gitignore/": true
+    },
+    
+}
