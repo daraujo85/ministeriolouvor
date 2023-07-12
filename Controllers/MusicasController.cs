@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using Newtonsoft.Json;
 
 namespace MinisterioLouvor.Controllers
 {
@@ -19,7 +20,7 @@ namespace MinisterioLouvor.Controllers
     [Route("api/[controller]")]
     public class MusicasController : ControllerBase
     {
-        private const string openAiApiKey = "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";
+        private const string openAiApiKey = "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";
 
         private readonly IMusicaRepository _musicaRepository;
 
@@ -327,7 +328,17 @@ namespace MinisterioLouvor.Controllers
         private async Task<string[]> GerarTags(string letraMusica)
         {
             string apiUrl = "v1/engines/text-davinci-003/completions";
-            string prompt = "Identifique as tags relacionadas ao conteúdo da música a seguir:\n\n" + letraMusica;
+            string prompt = "Crie tags em português mais abrangentes relacionadas a fé cristã que tenham ligação com a mensagem da música. Que seja uma ou duas palavras por tag que consiga funcionar como uma categoria que agrupara futuras musicas similares, como por exemplo: 'Adoração', ou 'Ceia', 'Batismo', 'Evangelistica', 'Nantal', 'Gratidão', 'Família', 'Páscoa', 'Fidelidade', 'Amizade', 'Amor', 'Mãe', 'Pai', 'Filho', 'Espírito Santo', 'Unção', 'Arrependimento', 'Dependência'. Retorne apenas uma palavra em cada item do array e apenas o array sem nada antes e nem depois. E apenas top 5 das mais relevantes em relacao a letra";
+            string formattedText = letraMusica.Replace("\n", " ").Trim(); // Remove quebras de linha e espaços extras
+
+            // Limita o tamanho do texto para reduzir o custo de envio
+            const int maxTextLength = 1024;
+            if (formattedText.Length > maxTextLength)
+            {
+                formattedText = formattedText.Substring(0, maxTextLength);
+            }
+
+            prompt += formattedText;
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, apiUrl))
             {
@@ -341,23 +352,31 @@ namespace MinisterioLouvor.Controllers
 
                     string json = await response.Content.ReadAsStringAsync();
 
-                    // Faz o parsing da resposta JSON para obter as tags geradas
+                    // Parse the JSON response to obtain the generated text
                     var jsonObject = JObject.Parse(json);
-                    var completions = jsonObject["choices"].First["text"].ToString();
-                    var tags = completions.Split(',');
+                    var completions = jsonObject["choices"].First["text"].ToString().Replace(",", string.Empty);
 
-                    // Remove espaços em branco e aspas das tags
-                    for (int i = 0; i < tags.Length; i++)
-                    {
-                        tags[i] = tags[i].Trim().Trim('"');
-                    }
+                    // Extract the tags from the generated text
+                    var tags = ExtractTags(completions);
 
                     return tags;
                 }
             }
         }
 
+        private string[] ExtractTags(string text)
+        {
+            // Extract tags enclosed in single quotes
+            var tagMatches = Regex.Matches(text, @"'([^']*)'");
+
+            // Convert matches to array of tags
+            var tags = tagMatches.Cast<Match>().Select(m => m.Groups[1].Value).ToArray();
+
+            return tags;
+        }
 
     }
+
+
 }
 
