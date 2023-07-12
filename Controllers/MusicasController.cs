@@ -19,7 +19,7 @@ namespace MinisterioLouvor.Controllers
     [Route("api/[controller]")]
     public class MusicasController : ControllerBase
     {
-        private const string openAiApiKey = "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";
+        private const string openAiApiKey = "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";
 
         private readonly IMusicaRepository _musicaRepository;
 
@@ -147,13 +147,41 @@ namespace MinisterioLouvor.Controllers
             return StatusCode(204);
         }
 
-        [HttpPost("{link}")]
+        [HttpGet("GetTags/{link}")]
         public async Task<IActionResult> GetTags(string link)
         {
             string letra = ObterLetraDaMusica(link);
             var tags = await GerarTags(letra);
 
             return Ok(tags);
+        }
+        [HttpGet("GetCifra/{link}")]
+        public async Task<IActionResult> GetCifra(string link)
+        {
+            string cifra = ObterCifraDaMusica(link);
+
+            return Ok(cifra);
+        }
+        [HttpGet("GetLetra/{link}")]
+        public async Task<IActionResult> GetLetra(string link)
+        {
+            string letra = ObterLetraDaMusica(link);
+
+            return Ok(letra);
+        }
+        [HttpGet("GetCifraLinks/{titulo}")]
+        public async Task<IActionResult> GetCifraLinks(string titulo)
+        {
+            var links = await ListarResultadosGoogle("cifraclub.com.br", titulo);
+
+            return Ok(links);
+        }
+        [HttpGet("GetLetraLinks/{titulo}")]
+        public async Task<IActionResult> GetLetraLinks(string titulo)
+        {
+            var links = await ListarResultadosGoogle("letras.mus.br", titulo);
+
+            return Ok(links);
         }
         private string ObterLetraDaMusica(string link)
         {
@@ -216,6 +244,86 @@ namespace MinisterioLouvor.Controllers
             }
         }
 
+        private string ObterCifraDaMusica(string link)
+        {
+            // Decodifica o link
+            string decodedLink = Uri.UnescapeDataString(link);
+
+            // Cria uma instância do HttpClient com a configuração do BaseAddress
+            using (var httpClient = new HttpClient { BaseAddress = new Uri("https://www.cifraclub.com.br/") })
+            {
+
+                // Obtém o conteúdo da página
+                string pagina = httpClient.GetStringAsync(decodedLink).Result;
+
+                // Carrega o conteúdo da página com o HtmlAgilityPack
+                var doc = new HtmlDocument();
+                doc.LoadHtml(pagina);
+
+                var cifraDiv = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'cifra_cnt')]");
+
+                if (cifraDiv != null)
+                {
+                    // Encontra o conteúdo dentro das tags <pre></pre> para obter a cifra
+                    var preTags = cifraDiv.SelectNodes(".//pre");
+                    if (preTags != null && preTags.Count > 0)
+                    {
+                        var cifra = preTags[0].InnerText.Trim();
+                        return cifra;
+                    }
+                }
+
+                // Caso a div ou a cifra não sejam encontradas, retorna uma string vazia
+                return string.Empty;
+
+            }
+        }
+
+        private async Task<List<dynamic>> ListarResultadosGoogle(string site, string termo)
+        {
+            string query = Uri.EscapeDataString(termo);
+            string searchUrl = $"search?q={query} site: {site}";
+
+
+            // Cria uma instância do HttpClient com a configuração do BaseAddress
+            using (var httpClient = new HttpClient { BaseAddress = new Uri("https://www.google.com/") })
+            {
+                // Faz a solicitação HTTP para obter o conteúdo da página de pesquisa do Google
+                var response = await httpClient.GetAsync(searchUrl);
+                response.EnsureSuccessStatusCode();
+
+                // Lê o conteúdo da resposta HTTP
+                var htmlContent = await response.Content.ReadAsStringAsync();
+
+                // Encontra os links e títulos dos resultados de pesquisa usando o HtmlAgilityPack
+                var doc = new HtmlDocument();
+                doc.LoadHtml(htmlContent);
+
+                var searchResults = new List<dynamic>();
+
+                var resultNodes = doc.DocumentNode.SelectNodes("//a[@href]");
+                if (resultNodes != null)
+                {
+                    foreach (var resultNode in resultNodes)
+                    {
+                        var url = resultNode.GetAttributeValue("href", string.Empty);
+                        var titleNode = resultNode.SelectSingleNode(".//h3");
+
+                        // Verifica se o link é válido e se o nó do título é encontrado
+                        if (!string.IsNullOrEmpty(url) && titleNode != null && url.Contains(site))
+                        {
+                            var title = titleNode.InnerText.Trim();
+
+                            searchResults.Add(new { Title = title, Url = url.Replace("/url?q=", string.Empty).Replace("&amp", string.Empty).Split(";")?.FirstOrDefault() });
+                        }
+                    }
+                }
+
+                return searchResults;
+            }
+        }
+
+
         private async Task<string[]> GerarTags(string letraMusica)
         {
             string apiUrl = "v1/engines/text-davinci-003/completions";
@@ -252,3 +360,4 @@ namespace MinisterioLouvor.Controllers
 
     }
 }
+
