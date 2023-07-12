@@ -11,8 +11,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
-using Newtonsoft.Json;
 
 namespace MinisterioLouvor.Controllers
 {
@@ -20,7 +18,7 @@ namespace MinisterioLouvor.Controllers
     [Route("api/[controller]")]
     public class MusicasController : ControllerBase
     {
-        private const string openAiApiKey = "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";
+        private const string openAiApiKey = "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";
 
         private readonly IMusicaRepository _musicaRepository;
 
@@ -332,7 +330,7 @@ namespace MinisterioLouvor.Controllers
             string formattedText = letraMusica.Replace("\n", " ").Trim(); // Remove quebras de linha e espaços extras
 
             // Limita o tamanho do texto para reduzir o custo de envio
-            const int maxTextLength = 1024;
+            const int maxTextLength = 512;
             if (formattedText.Length > maxTextLength)
             {
                 formattedText = formattedText.Substring(0, maxTextLength);
@@ -343,7 +341,7 @@ namespace MinisterioLouvor.Controllers
             using (var request = new HttpRequestMessage(HttpMethod.Post, apiUrl))
             {
                 request.Headers.Add("Authorization", $"Bearer {openAiApiKey}");
-                request.Content = new StringContent($"{{ \"prompt\": \"{prompt}\", \"max_tokens\": 64, \"n\": 1 }}", Encoding.UTF8, "application/json");
+                request.Content = new StringContent($"{{ \"prompt\": \"{prompt}\", \"max_tokens\": 32, \"n\": 1 }}", Encoding.UTF8, "application/json");
 
                 using (var httpClient = new HttpClient { BaseAddress = new Uri("https://api.openai.com/") })
                 {
