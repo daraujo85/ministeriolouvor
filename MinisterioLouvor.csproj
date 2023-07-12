@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Apis" Version="1.51.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.51.0.2294" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.49" />
     <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
     <PackageReference Include="ServiceStack.Core" Version="5.9.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />

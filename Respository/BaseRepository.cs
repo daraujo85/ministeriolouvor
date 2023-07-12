@@ -49,6 +49,36 @@ namespace MinisterioLouvor.Respository
       var all = await DbSet.FindAsync(Builders<TEntity>.Filter.Empty);
       return all.ToList();
     }
+    public virtual async Task<IEnumerable<TEntity>> GetByFilter(TEntity filterObject)
+    {
+        ConfigDbSet();
+
+        var builder = Builders<TEntity>.Filter;
+        var filterDefinition = builder.Empty;
+
+        foreach (var property in typeof(TEntity).GetProperties())
+        {
+            var value = property.GetValue(filterObject);
+            if (value != null)
+            {
+                if (property.PropertyType == typeof(List<string>))
+                {
+                    var arrayFilter = builder.In(property.Name, (List<string>)value);
+                    filterDefinition &= arrayFilter;
+                }
+                else
+                {
+                    var fieldFilter = builder.Eq(property.Name, value);
+                    filterDefinition &= fieldFilter;
+                }
+            }
+        }
+
+        var data = await DbSet.FindAsync(filterDefinition);
+
+        return data.ToList();
+    }
+
     public virtual async Task<IEnumerable<TEntity>> GetByFilter(Expression<Func<TEntity, bool>> expression)
     {
       ConfigDbSet();
