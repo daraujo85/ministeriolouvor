@@ -29,6 +29,9 @@ namespace MinisterioLouvor.Models
         [BsonElement("dificuldade")]
         public string Dificuldade { get; set; }
 
+        [BsonElement("classificacao")]
+        public int Classificacao { get; set; }
+
         [BsonElement("linkVideo")]
         public string LinkVideo { get; set; }
 
