@@ -41,6 +41,24 @@ namespace MinisterioLouvor.Controllers
 
         }
 
+        [HttpGet("GetYoutubeInfoV2/{titulo}")]
+        public async Task<IActionResult> GetYoutubeInfoV2(string titulo)
+        {
+            var links = await ListarResultadosGoogle("youtube.com", titulo);
+
+            var result = links.Select(x=> new Video{
+              Id = GetVideoIdFromUrl(x.Url),
+              Titulo = x.Title,
+              Descricao = x.Title,
+              LargeThumbnail = $"https://img.youtube.com/vi/{GetVideoIdFromUrl(x.Url)}/0.jpg",
+              SmallThumbnail = $"https://i.ytimg.com/vi/{GetVideoIdFromUrl(x.Url)}/default.jpg",
+              Url = $"https://www.youtube.com/watch?v={GetVideoIdFromUrl(x.Url)}"
+            });
+
+            return Ok(result);
+
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -321,7 +339,10 @@ namespace MinisterioLouvor.Controllers
                         {
                             var title = titleNode.InnerText.Trim();
 
-                            searchResults.Add(new { Title = title, Url = url.Replace("/url?q=", string.Empty).Replace("&amp", string.Empty).Split(";")?.FirstOrDefault() });
+                            var decodedUrl = Uri.UnescapeDataString(url).Replace("/url?q=", string.Empty).Replace("&amp", string.Empty).Split(";")?.FirstOrDefault();
+                            
+                            
+                            searchResults.Add(new { Title = title, Url = decodedUrl });
                         }
                     }
                 }
@@ -330,7 +351,23 @@ namespace MinisterioLouvor.Controllers
             }
         }
 
+        private string GetVideoIdFromUrl(string url)
+        {
+            var queryStartIndex = url.IndexOf("youtube.com/watch?v=");
+            if (queryStartIndex != -1)
+            {
+                var videoIdStartIndex = queryStartIndex + "youtube.com/watch?v=".Length;
+                var videoIdEndIndex = url.IndexOf('&', videoIdStartIndex);
+                if (videoIdEndIndex == -1)
+                    videoIdEndIndex = url.Length;
 
+                var videoIdLength = videoIdEndIndex - videoIdStartIndex;
+                if (videoIdLength > 0)
+                    return url.Substring(videoIdStartIndex, videoIdLength);
+            }
+
+            return null;
+        }
         private async Task<string[]> GerarTags(string letraMusica)
         {
             string apiUrl = "v1/engines/text-davinci-003/completions";
