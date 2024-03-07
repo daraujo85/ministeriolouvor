@@ -208,6 +208,13 @@ namespace MinisterioLouvor.Controllers
 
             return Ok(links);
         }
+        [HttpGet("GetResults/{site}/{titulo}")]
+        public async Task<IActionResult> GetResults(string site, string titulo)
+        {
+            var links = await ListarResultadosGoogle(site, titulo);
+
+            return Ok(links);
+        }
         private string ObterLetraDaMusica(string link)
         {
             // Decodifica o link
@@ -227,7 +234,7 @@ namespace MinisterioLouvor.Controllers
 
                     // Encontra os elementos HTML que contêm a letra da música
                     var elementosLetra = documento.DocumentNode.Descendants("div")
-                        .Where(d => d.GetAttributeValue("class", "").Equals("cnt-letra"));
+                        .Where(d => d.GetAttributeValue("class", "").Equals("lyric-original"));
 
                     if (elementosLetra.Any())
                     {
